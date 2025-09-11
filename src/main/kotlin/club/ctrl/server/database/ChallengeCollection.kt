@@ -1,6 +1,8 @@
 package club.ctrl.server.database
 
+import club.ctrl.server.challenges.ChallengeManager
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.Filters
 
 const val CHALLENGES = "challenges"
 
@@ -23,4 +25,16 @@ fun getChallengeMeta(db: MongoDatabase): Map<Int, Pair<Boolean, Boolean>> {
     }
 
     return metaList
+}
+
+// return true if the challenge exists and it is unlocked
+fun getChallengeUnlocked(challengeId: Int, db: MongoDatabase): Boolean {
+    if(ChallengeManager.challenges.size <= challengeId) return false
+
+    val filter = Filters.eq("challengeId", challengeId)
+    val result = db.getCollection(CHALLENGES).find(filter).first()
+
+    result ?: return false
+
+    return result.getBoolean("unlocked", false) // default to false if it doesn't exist
 }
