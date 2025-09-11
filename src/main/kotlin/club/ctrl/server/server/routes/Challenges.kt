@@ -1,6 +1,7 @@
 package club.ctrl.server.server.routes
 
 import club.ctrl.server.challenges.ChallengeManager
+import club.ctrl.server.database.addViewIfNotExists
 import club.ctrl.server.database.getChallengeMeta
 import club.ctrl.server.database.getChallengeSubmissions
 import club.ctrl.server.database.getChallengeUnlocked
@@ -87,7 +88,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
                 null // no completed answer ofc
             ))
 
-
+            addViewIfNotExists(userId, id, workingAt, db) // add their view to the view collection
         }
 
         // then here we collate everything into the obj to send to the frontend
