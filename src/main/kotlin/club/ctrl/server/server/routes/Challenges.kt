@@ -36,7 +36,10 @@ fun Route.challengesRoute(db: MongoDatabase) {
             val visible_unlocked = challengeMeta[challenge.id]!!
             if(!visible_unlocked.first) continue // if challenge is not visible, don't send to frontend
 
-            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, 1, visible_unlocked.second, challenge.name))
+            // get the amount of subchallenges completed to show the correct stars
+            val submissions = getChallengeSubmissions(userId, challenge.id, db)
+
+            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, submissions.size, visible_unlocked.second, challenge.name))
         }
 
         call.respondSuccess(challengeListingBuilder)
