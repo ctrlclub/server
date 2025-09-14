@@ -1,5 +1,6 @@
 package club.ctrl.server.server
 
+import club.ctrl.server.entity.respondError
 import club.ctrl.server.server.routes.authenticationRoutes
 import club.ctrl.server.server.routes.challengesRoute
 import com.mongodb.ConnectionString
@@ -55,7 +56,7 @@ fun startServer() {
         // abort all requests on the AbortResponse exception, used for custom plugins
         install(StatusPages) {
             exception<AbortPipeline> { call, _ ->
-                call.response.status()
+                call.respondError("Error during authentication")
             }
         }
 

@@ -1,6 +1,7 @@
 package club.ctrl.server.server
 
 import club.ctrl.server.database.tokenToEmail
+import club.ctrl.server.entity.respondError
 import com.mongodb.client.MongoDatabase
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.createRouteScopedPlugin
@@ -29,13 +30,13 @@ public val SIDValidator = createRouteScopedPlugin(
         val sid = call.request.cookies["sid"]
 
         if(sid.isNullOrBlank()) {
-            call.respond(HttpStatusCode.Forbidden, "Missing auth token")
+            call.respondError("Missing auth token")
             throw AbortPipeline()
         }
 
         val emailLookup = tokenToEmail(sid, cfg.dbHandle!!)
         if(emailLookup == null) {
-            call.respond(HttpStatusCode.Forbidden, "Invalid auth token")
+            call.respondError("Invalid auth token")
             throw AbortPipeline()
         }
 
