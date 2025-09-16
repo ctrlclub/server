@@ -12,8 +12,10 @@ import club.ctrl.server.entity.respondError
 import club.ctrl.server.entity.respondSuccess
 import club.ctrl.server.server.UserIdKey
 import com.mongodb.client.MongoDatabase
+import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,6 +23,9 @@ data class ChallengeListing(val challengeId: Int, val numSubchallenges: Int, val
 
 @Serializable
 data class SubchallengeContent(val subchallengeId: Int, val content: String, val completed: Boolean, val answer: String?)
+
+@Serializable
+data class UserSubmission(val challengeId: Int, val subchallengeId: Int, val answer: String)
 
 
 fun Route.challengesRoute(db: MongoDatabase) {
@@ -106,5 +111,38 @@ fun Route.challengesRoute(db: MongoDatabase) {
         }
 
         call.respondSuccess(subchallengeContents.reversed())
+    }
+
+    post("/submit") {
+        val userId = call.attributes[UserIdKey]
+        val submission = call.receive<UserSubmission>()
+
+        if(ChallengeManager.challenges.size <= submission.challengeId || ChallengeManager.challenges.getOrNull(submission.challengeId) == null) {
+            call.respondError("Unknown challenge (unknown id)")
+            return@post
+        }
+
+        val challengeObj = ChallengeManager.challenges.get(submission.challengeId);
+
+
+        if(challengeObj.subchallenges.size <= submission.subchallengeId) {
+            call.respondError("Unknown subchallenge (unknown id)")
+            return@post
+        }
+
+        val subchallengeObj = challengeObj.subchallenges.get(submission.subchallengeId)
+
+        if(getChallengeSubmissions(userId, submission.challengeId, db).any { it.subchallengeId == submission.subchallengeId }) {
+            call.respondError("You have already completed this challenge")
+            return@post
+        }
+
+        if(getWorkingAt(userId, submission.challengeId, db) != submission.subchallengeId) {
+            call.respondError("You haven't unlocked this subchallenge yet")
+            return@post
+        }
+
+        // asserted the following: challenge exists, subchallenge exists, user hasn't done subchallenge yet, user is working at subchallenge
+        // so now we can check if the actual answer is correct
     }
 }
