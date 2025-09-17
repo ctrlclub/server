@@ -2,6 +2,7 @@ package club.ctrl.server.challenges.impl
 
 import club.ctrl.server.challenges.Challenge
 import club.ctrl.server.challenges.Subchallenge
+import club.ctrl.server.server.routes.SubmissionFeedback
 
 object SecondChallenge : Challenge {
     override val name: String = "Not the beginning anymore"
@@ -17,9 +18,8 @@ object SecondChallengeP0 : Subchallenge {
         println("$userId opened the second challenge first sassignmenet yeah assignment!")
     }
 
-    override fun onSubmit(userId: String, submission: String): Boolean {
-        println("$userId guessed $submission. Returning false.")
-        return false;
+    override fun onSubmit(userId: String, submission: String): SubmissionFeedback {
+        return SubmissionFeedback(correct = submission == "hi", "The answer is hi")
     }
 }
 
@@ -31,9 +31,8 @@ object SecondChallengeP1 : Subchallenge {
         println("$userId opened the second second yeah assignment!")
     }
 
-    override fun onSubmit(userId: String, submission: String): Boolean {
-        println("$userId guessed $submission on the second assignment. Returning false.")
-        return false;
+    override fun onSubmit(userId: String, submission: String): SubmissionFeedback {
+        return SubmissionFeedback(correct = submission == "hi", "The answer is hi")
     }
 }
 
@@ -45,8 +44,7 @@ object SecondChallengeP2 : Subchallenge {
         println("$userId opened the third second yeah assignment!")
     }
 
-    override fun onSubmit(userId: String, submission: String): Boolean {
-        println("$userId guessed $submission on the second assignment. Returning false.")
-        return false;
+    override fun onSubmit(userId: String, submission: String): SubmissionFeedback {
+        return SubmissionFeedback(correct = submission == "hi", "The answer is hi")
     }
 }

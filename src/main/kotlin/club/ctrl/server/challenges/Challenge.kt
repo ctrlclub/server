@@ -1,5 +1,6 @@
 package club.ctrl.server.challenges
 
+import club.ctrl.server.server.routes.SubmissionFeedback
 import java.nio.charset.StandardCharsets
 import kotlin.collections.getOrNull
 import kotlin.io.readBytes
@@ -29,7 +30,7 @@ interface Subchallenge {
     fun loadMarkdown(userId: String): String = loadLocalContent() ?: "No content available for this challenge"
 
     // Used when a user requests to submit an answer.
-    fun onSubmit(userId: String, submission: String): Boolean
+    fun onSubmit(userId: String, submission: String): SubmissionFeedback
 
     // Internal helper function to load local markdown from the resources/ folder
     private fun loadLocalContent(): String? {

@@ -5,13 +5,14 @@ import club.ctrl.server.database.addViewIfNotExists
 import club.ctrl.server.database.getChallengeMeta
 import club.ctrl.server.database.getChallengeSubmissions
 import club.ctrl.server.database.getChallengeUnlocked
-import club.ctrl.server.database.getLastViewed
 import club.ctrl.server.database.getWorkingAt
 import club.ctrl.server.database.hasViewed
+import club.ctrl.server.database.registerSubmission
 import club.ctrl.server.entity.respondError
 import club.ctrl.server.entity.respondSuccess
 import club.ctrl.server.server.UserIdKey
 import com.mongodb.client.MongoDatabase
+import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -27,10 +28,13 @@ data class SubchallengeContent(val subchallengeId: Int, val content: String, val
 @Serializable
 data class UserSubmission(val challengeId: Int, val subchallengeId: Int, val answer: String)
 
+@Serializable
+data class SubmissionFeedback(val correct: Boolean, val userFeedback: String)
+
 
 fun Route.challengesRoute(db: MongoDatabase) {
     get("/list") {
-        val userId = call.attributes.get(UserIdKey)!! // injected by authenticating middleware
+        val userId = call.attributes[UserIdKey] // injected by authenticating middleware
 
         val challengeListingBuilder: MutableList<ChallengeListing> = mutableListOf()
 
@@ -65,7 +69,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
             return@get
         }
 
-        val id = urlId - 1
+        val id = urlId
         val challengeObj = ChallengeManager.challenges.getOrNull(id)
         if(challengeObj == null) {
             call.respondError("No challenge was found with the provided ID")
@@ -115,14 +119,21 @@ fun Route.challengesRoute(db: MongoDatabase) {
 
     post("/submit") {
         val userId = call.attributes[UserIdKey]
-        val submission = call.receive<UserSubmission>()
+        val submission: UserSubmission;
+
+        try {
+            submission = call.receive<UserSubmission>()
+        } catch(ex: ContentTransformationException) {
+            call.respondError("Invalid submission format: $ex")
+            return@post
+        }
 
         if(ChallengeManager.challenges.size <= submission.challengeId || ChallengeManager.challenges.getOrNull(submission.challengeId) == null) {
             call.respondError("Unknown challenge (unknown id)")
             return@post
         }
 
-        val challengeObj = ChallengeManager.challenges.get(submission.challengeId);
+        val challengeObj = ChallengeManager.challenges[submission.challengeId];
 
 
         if(challengeObj.subchallenges.size <= submission.subchallengeId) {
@@ -130,13 +141,14 @@ fun Route.challengesRoute(db: MongoDatabase) {
             return@post
         }
 
-        val subchallengeObj = challengeObj.subchallenges.get(submission.subchallengeId)
+        val subchallengeObj = challengeObj.subchallenges[submission.subchallengeId]
 
         if(getChallengeSubmissions(userId, submission.challengeId, db).any { it.subchallengeId == submission.subchallengeId }) {
             call.respondError("You have already completed this challenge")
             return@post
         }
 
+        println("$userId is currently working at ${getWorkingAt(userId, submission.challengeId, db)}")
         if(getWorkingAt(userId, submission.challengeId, db) != submission.subchallengeId) {
             call.respondError("You haven't unlocked this subchallenge yet")
             return@post
@@ -144,5 +156,13 @@ fun Route.challengesRoute(db: MongoDatabase) {
 
         // asserted the following: challenge exists, subchallenge exists, user hasn't done subchallenge yet, user is working at subchallenge
         // so now we can check if the actual answer is correct
+
+        val feedback = subchallengeObj.onSubmit(userId, submission.answer)
+
+        if(feedback.correct) {
+            registerSubmission(submission.challengeId, submission.subchallengeId, userId, submission.answer, db)
+        }
+
+        call.respondSuccess(feedback)
     }
 }

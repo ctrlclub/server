@@ -4,6 +4,7 @@ import club.ctrl.server.challenges.ChallengeManager
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.bson.Document
 
@@ -18,6 +19,8 @@ fun getWorkingAt(userId: String, challengeId: Int, db: MongoDatabase): Int? {
     if(ChallengeManager.challenges.getOrNull(challengeId) == null) return null;
     val submissions = getChallengeSubmissions(userId, challengeId, db)
 
+    println(submissions)
+
     if(submissions.size == ChallengeManager.challenges[challengeId].subchallenges.size) {
         return null;
     }
@@ -28,8 +31,11 @@ fun getWorkingAt(userId: String, challengeId: Int, db: MongoDatabase): Int? {
 
 // returns all submissions on a challenge, ordered by subchallenge id
 fun getChallengeSubmissions(userId: String, challengeId: Int, db: MongoDatabase): List<Submission> {
+    println("Looking for values with uid:$userId and cid:$challengeId")
     val filter = Filters.and(Filters.eq("userId", userId), Filters.eq("challengeId", challengeId))
     val databaseResult = db.getCollection(SUBMISSIONS).find(filter)
+
+    println("Pulled ${databaseResult.toList().size}")
 
     val results = databaseResult.toList().filterNotNull()
 
@@ -38,4 +44,18 @@ fun getChallengeSubmissions(userId: String, challengeId: Int, db: MongoDatabase)
         val json = it.toJson()
         Json.decodeFromString<Submission>(json)
     }.toList().sortedBy { it.subchallengeId }
+}
+
+
+// adds a correct submission to the database, returns a string if there was an error
+fun registerSubmission(challengeId: Int, subchallengeId: Int, userId: String, answer: String, db: MongoDatabase) {
+
+    val unixSecondsNow = System.currentTimeMillis().floorDiv(1000);
+    val submission = Submission(challengeId, subchallengeId, userId, answer, unixSecondsNow)
+
+    // yeah its a bit backwards its for type safety
+    val json = Json.encodeToString(submission)
+    val document = Document.parse(json)
+
+    db.getCollection(SUBMISSIONS).insertOne(document)
 }
