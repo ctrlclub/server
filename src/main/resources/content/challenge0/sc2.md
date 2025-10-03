@@ -6,7 +6,7 @@ numbers = [1, 2, 3]
 print(sum(numbers)) # this will print 6
 ```
 
----
+
 
 The manager doesn't seem satisfied. She's worried production levels aren't consistent across days... To help her do further analysis, she wants you to **sum** the production numbers for **every second day**.
 
