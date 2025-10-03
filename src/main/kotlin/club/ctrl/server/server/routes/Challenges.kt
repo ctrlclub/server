@@ -11,6 +11,7 @@ import club.ctrl.server.database.registerSubmission
 import club.ctrl.server.entity.respondError
 import club.ctrl.server.entity.respondSuccess
 import club.ctrl.server.server.UserIdKey
+import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
@@ -18,6 +19,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.serialization.Serializable
+import org.bson.Document
 
 @Serializable
 data class ChallengeListing(val challengeId: Int, val numSubchallenges: Int, val completedSubchallenges: Int, val unlocked: Boolean, val name: String)
@@ -63,13 +65,12 @@ fun Route.challengesRoute(db: MongoDatabase) {
             return@get
         }
 
-        val urlId = idParameter.toIntOrNull(10)
-        if(urlId == null) {
+        val id = idParameter.toIntOrNull(10)
+        if(id == null) {
             call.respondError("The challenge ID provided was not a number")
             return@get
         }
 
-        val id = urlId
         val challengeObj = ChallengeManager.challenges.getOrNull(id)
         if(challengeObj == null) {
             call.respondError("No challenge was found with the provided ID")
@@ -89,13 +90,13 @@ fun Route.challengesRoute(db: MongoDatabase) {
             val viewed = hasViewed(userId, id, workingAt, db)
             if(!viewed) {
                 // first we get the subchallenge to init anything it needs to
-                ChallengeManager.challenges[id].subchallenges[workingAt].onFirstOpen(userId)
+                ChallengeManager.challenges[id].subchallenges[workingAt].onFirstOpen(userId, scopeChallengeCollection(challengeObj.id, db))
             }
 
             // add the contents for the working at subchallenge
             subchallengeContents.add(SubchallengeContent(
                 workingAt, // subchallenge id
-                ChallengeManager.challenges[id].subchallenges[workingAt].loadMarkdown(userId), // md content
+                ChallengeManager.challenges[id].subchallenges[workingAt].loadMarkdown(userId, scopeChallengeCollection(challengeObj.id, db)), // md content
                 false, // completed? is false cuz they're "workingAt" it. ha. ha. ok not funny
                 null // no completed answer ofc
             ))
@@ -108,7 +109,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
         for(sub in submissions.reversed()) {
             subchallengeContents.add(SubchallengeContent(
                 sub.subchallengeId,
-                ChallengeManager.challenges[id].subchallenges[sub.subchallengeId].loadMarkdown(userId),
+                ChallengeManager.challenges[id].subchallenges[sub.subchallengeId].loadMarkdown(userId, scopeChallengeCollection(challengeObj.id, db)),
                 true,
                 sub.answer
             ))
@@ -157,7 +158,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
         // asserted the following: challenge exists, subchallenge exists, user hasn't done subchallenge yet, user is working at subchallenge
         // so now we can check if the actual answer is correct
 
-        val feedback = subchallengeObj.onSubmit(userId, submission.answer)
+        val feedback = subchallengeObj.onSubmit(userId, submission.answer, scopeChallengeCollection(challengeObj.id, db))
 
         if(feedback.correct) {
             registerSubmission(submission.challengeId, submission.subchallengeId, userId, submission.answer, db)
@@ -166,3 +167,5 @@ fun Route.challengesRoute(db: MongoDatabase) {
         call.respondSuccess(feedback)
     }
 }
+
+fun scopeChallengeCollection(challengeId: Int, db: MongoDatabase): MongoCollection<Document> = db.getCollection("challengecollection_${challengeId}")
