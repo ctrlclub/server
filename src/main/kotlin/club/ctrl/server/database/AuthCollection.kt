@@ -84,8 +84,6 @@ fun tokenToEmail(sessionToken: String, db: MongoDatabase): String? {
         .first()
     ?: return null
 
-    println(result)
-
     return result["email"] as String?
 }
 
@@ -111,6 +109,16 @@ fun addSession(email: String, db: MongoDatabase): SessionObject {
     db.getCollection(SESSIONS).insertOne(doc)
 
     return session
+}
+
+// get if user is priviledged or not
+fun isPrivileged(userId: String, db: MongoDatabase): Boolean {
+    val result = db.getCollection(CREDENTIALS)
+        .find(eq("email", userId))
+        .first()
+        ?: return false
+
+    return result["permissionLevel"] == 0
 }
 
 

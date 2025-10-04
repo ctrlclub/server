@@ -3,6 +3,7 @@ package club.ctrl.server.server
 import club.ctrl.server.entity.respondError
 import club.ctrl.server.server.routes.authenticationRoutes
 import club.ctrl.server.server.routes.challengesRoute
+import club.ctrl.server.server.routes.dashboardRoutes
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClients
@@ -75,9 +76,19 @@ fun startServer() {
             route("/challenges") {
                 install(SIDValidator) {
                     dbHandle = db
+                    requiresAdmin = false
                 }
 
                 challengesRoute(db)
+            }
+
+            route("/dashboard") {
+                install(SIDValidator) {
+                    dbHandle = db;
+                    requiresAdmin = true
+                }
+
+                dashboardRoutes(db)
             }
         }
     };

@@ -1,11 +1,10 @@
 package club.ctrl.server.server
 
+import club.ctrl.server.database.isPrivileged
 import club.ctrl.server.database.tokenToEmail
 import club.ctrl.server.entity.respondError
 import com.mongodb.client.MongoDatabase
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.createRouteScopedPlugin
-import io.ktor.server.response.respond
 import io.ktor.util.AttributeKey
 import kotlin.text.isNullOrBlank
 
@@ -16,7 +15,7 @@ public val UserIdKey = AttributeKey<String>("userId")
 class AbortPipeline : RuntimeException()
 
 // config for the plugin
-class Config { var dbHandle: MongoDatabase? = null }
+class Config { var dbHandle: MongoDatabase? = null; var requiresAdmin: Boolean = true }
 
 // ktor plugin to ensure valid sid is present in a request
 // if a valid sid is not present, the plugin will throw an AbortPipeline error
@@ -42,5 +41,11 @@ public val SIDValidator = createRouteScopedPlugin(
 
         // if the email is valid we attach it to the call
         call.attributes.put(UserIdKey, emailLookup);
+
+        if(cfg.requiresAdmin) {
+            if(!isPrivileged(emailLookup, cfg.dbHandle!!)) {
+                throw AbortPipeline()
+            }
+        }
     }
 }
