@@ -19,8 +19,6 @@ fun getWorkingAt(userId: String, challengeId: Int, db: MongoDatabase): Int? {
     if(ChallengeManager.challenges.getOrNull(challengeId) == null) return null;
     val submissions = getChallengeSubmissions(userId, challengeId, db)
 
-    println(submissions)
-
     if(submissions.size == ChallengeManager.challenges[challengeId].subchallenges.size) {
         return null;
     }
@@ -34,8 +32,6 @@ fun getChallengeSubmissions(userId: String, challengeId: Int, db: MongoDatabase)
     println("Looking for values with uid:$userId and cid:$challengeId")
     val filter = Filters.and(Filters.eq("userId", userId), Filters.eq("challengeId", challengeId))
     val databaseResult = db.getCollection(SUBMISSIONS).find(filter)
-
-    println("Pulled ${databaseResult.toList().size}")
 
     val results = databaseResult.toList().filterNotNull()
 
