@@ -1,6 +1,7 @@
 package club.ctrl.server.server.routes
 
 import club.ctrl.server.challenges.ChallengeManager
+import club.ctrl.server.challenges.Subchallenge
 import club.ctrl.server.database.addViewIfNotExists
 import club.ctrl.server.database.getChallengeMeta
 import club.ctrl.server.database.getChallengeSubmissions
@@ -26,6 +27,9 @@ data class ChallengeListing(val challengeId: Int, val numSubchallenges: Int, val
 
 @Serializable
 data class SubchallengeContent(val subchallengeId: Int, val content: String, val completed: Boolean, val answer: String?)
+
+@Serializable
+data class ContentLoad(val challengeName: String, val totalSubchallenges: Int, val subchallenges: List<SubchallengeContent>)
 
 @Serializable
 data class UserSubmission(val challengeId: Int, val subchallengeId: Int, val answer: String)
@@ -115,7 +119,8 @@ fun Route.challengesRoute(db: MongoDatabase) {
             ))
         }
 
-        call.respondSuccess(subchallengeContents.reversed())
+        val content = ContentLoad(subchallenges = subchallengeContents.reversed(), challengeName = challengeObj.name, totalSubchallenges = challengeObj.subchallenges.size)
+        call.respondSuccess(content)
     }
 
     post("/submit") {
