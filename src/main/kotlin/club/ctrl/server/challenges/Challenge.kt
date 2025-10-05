@@ -4,7 +4,6 @@ import club.ctrl.server.server.routes.SubmissionFeedback
 import com.mongodb.client.MongoCollection
 import org.bson.Document
 import java.nio.charset.StandardCharsets
-import kotlin.collections.getOrNull
 import kotlin.io.readBytes
 import kotlin.io.use
 
