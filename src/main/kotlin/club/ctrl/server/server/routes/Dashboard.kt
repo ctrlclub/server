@@ -1,14 +1,13 @@
 package club.ctrl.server.server.routes
 
-import club.ctrl.server.database.CHALLENGES
 import club.ctrl.server.database.ChallengeEntry
 import club.ctrl.server.database.SUBMISSIONS
 import club.ctrl.server.database.VIEWS
 import club.ctrl.server.database.getChallenges
+import club.ctrl.server.database.setPassword
 import club.ctrl.server.database.updateChallenges
 import club.ctrl.server.entity.respondError
 import club.ctrl.server.entity.respondSuccess
-import club.ctrl.server.server.UserIdKey
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import io.ktor.server.request.ContentTransformationException
@@ -21,7 +20,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ClearChallengeProgress(val userId: String, val challengeId: Int)
+@Serializable
 data class ClearSubchallengeProgress(val userId: String, val challengeId: Int, val subchallengeId: Int)
+@Serializable
+data class ChangePassword(val userId: String, val newPassword: String)
 
 fun Route.dashboardRoutes(db: MongoDatabase) {
     get("auth") {
@@ -74,6 +76,21 @@ fun Route.dashboardRoutes(db: MongoDatabase) {
         }
 
         resetSubchallenge(clear.userId, clear.challengeId, clear.subchallengeId, db)
+        call.respondSuccess(Unit)
+    }
+
+    post("set-password") {
+        val changePassword: ChangePassword;
+
+        try {
+            changePassword = call.receive<ChangePassword>()
+        } catch(ex: ContentTransformationException) {
+            call.respondError("Invalid submission format: $ex")
+            return@post
+        }
+
+        setPassword(changePassword.userId, changePassword.newPassword, db)
+
         call.respondSuccess(Unit)
     }
 }

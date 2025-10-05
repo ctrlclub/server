@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import club.ctrl.server.entity.ResponseWrapper
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters.eq
+import com.mongodb.client.model.Updates
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bson.Document
@@ -119,6 +120,13 @@ fun isPrivileged(userId: String, db: MongoDatabase): Boolean {
         ?: return false
 
     return result["permissionLevel"] == 0
+}
+
+
+// set the user password hash
+fun setPassword(userId: String, password: String, db: MongoDatabase) {
+    val newHash = BCrypt.withDefaults().hashToString(11, password.toCharArray())
+    db.getCollection(CREDENTIALS).updateOne(eq("email", userId), Updates.set<String>("passwordHash", newHash))
 }
 
 
