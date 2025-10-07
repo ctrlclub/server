@@ -34,7 +34,7 @@ Output:
 
 Remember when we used `range(0, 5)`?
 Well, the output hasn't printed up to 5 as you can see - it's only **printed up to 4**.
-The `range(start, end)` operator does not include the final number that you provide.
+The `range(start, end)` includes the start number, but excludes the end number.
 :::
 
-How many times will `range(1, 9)` loop?
+How many times will `range(2, 9)` loop?

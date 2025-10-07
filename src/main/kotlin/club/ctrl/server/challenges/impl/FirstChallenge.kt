@@ -23,7 +23,7 @@ object FirstChallengeP0 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        val answer = 9;
+        val answer = 7;
 
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
         if(answer == submission.toInt()) {

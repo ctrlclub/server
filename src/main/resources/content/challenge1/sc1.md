@@ -5,6 +5,7 @@ It's much easier to use the `sum` function, for example:
 numbers = [1, 2, 3]
 print(sum(numbers)) # this will print 6
 ```
+**Internally**, this will sum the lists using a for-loop - it's just a convenient shorthand.
 
 ---
 
