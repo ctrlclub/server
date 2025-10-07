@@ -84,14 +84,6 @@ object ThirdChallengeP0 : Subchallenge {
             }
             .size
 
-        println("\n\n\n\n\n\n\n\n")
-        println(explorers
-            .mapNotNull {
-                val sum = it.coord.x + it.coord.y
-                if (sum <= it.resources) sum else null
-            })
-
-
         val jsonString = Json.encodeToString(DatabaseEntry(userId, explorers.subList(0, 5), explorers.subList(5, 7), grid.map { it.toList() }, lowestExplorerName, sumCoordinates, totalSurvived))
         val doc = Document.parse(jsonString)
         db.insertOne(doc)
