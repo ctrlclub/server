@@ -6,6 +6,7 @@ import club.ctrl.server.database.addViewIfNotExists
 import club.ctrl.server.database.getChallengeMeta
 import club.ctrl.server.database.getChallengeSubmissions
 import club.ctrl.server.database.getChallengeUnlocked
+import club.ctrl.server.database.getUserTeam
 import club.ctrl.server.database.getWorkingAt
 import club.ctrl.server.database.hasViewed
 import club.ctrl.server.database.registerSubmission
@@ -61,7 +62,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
     }
 
     get("{id}") {
-        val userId = call.attributes[UserIdKey]
+        var userId = call.attributes[UserIdKey]
 
         val idParameter = call.parameters["id"]
         if(idParameter == null) {
@@ -79,6 +80,13 @@ fun Route.challengesRoute(db: MongoDatabase) {
         if(challengeObj == null) {
             call.respondError("No challenge was found with the provided ID")
             return@get
+        }
+
+        // internal userid -> team transformer
+        if(challengeObj.isTeamChallenge) {
+            val team = getUserTeam(userId, db);
+            team ?: call.respondError("You must be in a team to enter this challenge.")
+            userId = "internal_team${team!!.teamId}@ctrl.club"
         }
 
         val unlocked = getChallengeUnlocked(id, db);
@@ -124,7 +132,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
     }
 
     post("/submit") {
-        val userId = call.attributes[UserIdKey]
+        var userId = call.attributes[UserIdKey]
         val submission: UserSubmission;
 
         try {
@@ -148,6 +156,14 @@ fun Route.challengesRoute(db: MongoDatabase) {
         }
 
         val subchallengeObj = challengeObj.subchallenges[submission.subchallengeId]
+
+        // internal userid -> team transformer
+        if(challengeObj.isTeamChallenge) {
+            val team = getUserTeam(userId, db);
+            team ?: call.respondError("You must be in a team to enter this challenge.")
+            if(team!!.owner != userId) call.respondError("You must be the team leader to answer this question.")
+            userId = "internal_team${team.teamId}@ctrl.club"
+        }
 
         if(getChallengeSubmissions(userId, submission.challengeId, db).any { it.subchallengeId == submission.subchallengeId }) {
             call.respondError("You have already completed this challenge")

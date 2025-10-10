@@ -4,7 +4,9 @@ import club.ctrl.server.entity.respondError
 import club.ctrl.server.server.routes.authenticationRoutes
 import club.ctrl.server.server.routes.challengesRoute
 import club.ctrl.server.server.routes.dashboardRoutes
+import club.ctrl.server.server.routes.teamsRoutes
 import com.mongodb.ConnectionString
+import com.mongodb.LoggerSettings
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
@@ -84,14 +86,24 @@ fun startServer() {
 
             route("/dashboard") {
                 install(SIDValidator) {
-                    dbHandle = db;
+                    dbHandle = db
                     requiresAdmin = true
                 }
 
                 dashboardRoutes(db)
             }
+
+            route("/teams") {
+                install(SIDValidator) {
+                    dbHandle = db
+                    requiresAdmin = false
+                }
+
+                teamsRoutes(db)
+            }
         }
     };
 
+    println("Server started.")
     server.start(true);
 }

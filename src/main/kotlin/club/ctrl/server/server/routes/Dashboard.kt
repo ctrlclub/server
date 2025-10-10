@@ -3,7 +3,9 @@ package club.ctrl.server.server.routes
 import club.ctrl.server.database.ChallengeEntry
 import club.ctrl.server.database.SUBMISSIONS
 import club.ctrl.server.database.VIEWS
+import club.ctrl.server.database.clearTeams
 import club.ctrl.server.database.getChallenges
+import club.ctrl.server.database.populateTeams
 import club.ctrl.server.database.setPassword
 import club.ctrl.server.database.updateChallenges
 import club.ctrl.server.entity.respondError
@@ -24,6 +26,9 @@ data class ClearChallengeProgress(val userId: String, val challengeId: Int)
 data class ClearSubchallengeProgress(val userId: String, val challengeId: Int, val subchallengeId: Int)
 @Serializable
 data class ChangePassword(val userId: String, val newPassword: String)
+
+@Serializable
+data class GenTeamCodes(val number: Int)
 
 fun Route.dashboardRoutes(db: MongoDatabase) {
     get("auth") {
@@ -92,6 +97,26 @@ fun Route.dashboardRoutes(db: MongoDatabase) {
         setPassword(changePassword.userId, changePassword.newPassword, db)
 
         call.respondSuccess(Unit)
+    }
+
+    get("clear-teams") {
+        clearTeams(db)
+
+        call.respondSuccess(Unit)
+    }
+
+    post("gen-team-codes") {
+        val payload: GenTeamCodes;
+
+        try {
+            payload = call.receive<GenTeamCodes>()
+        } catch(ex: ContentTransformationException) {
+            call.respondError("Invalid submission format: $ex")
+            return@post
+        }
+
+        val codes = populateTeams(payload.number, db)
+        call.respondSuccess(codes)
     }
 }
 
