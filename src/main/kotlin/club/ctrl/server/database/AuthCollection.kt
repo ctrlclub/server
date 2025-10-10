@@ -78,8 +78,6 @@ fun logout(token: String, db: MongoDatabase) {
 
 // get the email (userid) from their token
 fun tokenToEmail(sessionToken: String, db: MongoDatabase): String? {
-    println("CHECKING!")
-    println(sessionToken)
     val result = db.getCollection(SESSIONS)
         .find(eq("token", sessionToken))
         .first()
