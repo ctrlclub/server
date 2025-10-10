@@ -32,6 +32,7 @@ object ThirdChallenge : Challenge {
     override val name: String = "Hard: Rescue Protocol"
     override val id: Int = 2
     override val subchallenges: List<Subchallenge> = listOf(ThirdChallengeP0, ThirdChallengeP1, ThirdChallengeP2)
+    override val isTeamChallenge: Boolean = false;
 }
 
 object ThirdChallengeP0 : Subchallenge {

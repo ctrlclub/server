@@ -23,13 +23,13 @@ import kotlinx.serialization.Serializable
 import org.bson.Document
 
 @Serializable
-data class ChallengeListing(val challengeId: Int, val numSubchallenges: Int, val completedSubchallenges: Int, val unlocked: Boolean, val name: String)
+data class ChallengeListing(val challengeId: Int, val numSubchallenges: Int, val completedSubchallenges: Int, val unlocked: Boolean, val name: String, val isTeamChallenge: Boolean)
 
 @Serializable
 data class SubchallengeContent(val subchallengeId: Int, val content: String, val completed: Boolean, val answer: String?)
 
 @Serializable
-data class ContentLoad(val challengeName: String, val totalSubchallenges: Int, val subchallenges: List<SubchallengeContent>)
+data class ContentLoad(val challengeName: String, val totalSubchallenges: Int, val subchallenges: List<SubchallengeContent>, val isTeamChallenge: Boolean)
 
 @Serializable
 data class UserSubmission(val challengeId: Int, val subchallengeId: Int, val answer: String)
@@ -54,7 +54,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
             // get the amount of subchallenges completed to show the correct stars
             val submissions = getChallengeSubmissions(userId, challenge.id, db)
 
-            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, submissions.size, visible_unlocked.second, challenge.name))
+            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, submissions.size, visible_unlocked.second, challenge.name, challenge.isTeamChallenge))
         }
 
         call.respondSuccess(challengeListingBuilder)
@@ -119,7 +119,7 @@ fun Route.challengesRoute(db: MongoDatabase) {
             ))
         }
 
-        val content = ContentLoad(subchallenges = subchallengeContents.reversed(), challengeName = challengeObj.name, totalSubchallenges = challengeObj.subchallenges.size)
+        val content = ContentLoad(subchallenges = subchallengeContents.reversed(), challengeName = challengeObj.name, totalSubchallenges = challengeObj.subchallenges.size, isTeamChallenge = challengeObj.isTeamChallenge)
         call.respondSuccess(content)
     }
 

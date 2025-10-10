@@ -18,6 +18,7 @@ object SecondChallenge : Challenge {
     override val name: String = "Easy: The Warehouse"
     override val id: Int = 1
     override val subchallenges: List<Subchallenge> = listOf(SecondChallengeP0, SecondChallengeP1, SecondChallengeP2)
+    override val isTeamChallenge: Boolean = false;
 }
 
 object SecondChallengeP0 : Subchallenge {

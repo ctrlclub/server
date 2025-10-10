@@ -14,6 +14,7 @@ object FirstChallenge : Challenge {
     override val name: String = "Basics: For-Loops"
     override val id: Int = 0
     override val subchallenges: List<Subchallenge> = listOf(FirstChallengeP0, FirstChallengeP1, FirstChallengeP2)
+    override val isTeamChallenge: Boolean = false;
 }
 
 object FirstChallengeP0 : Subchallenge {

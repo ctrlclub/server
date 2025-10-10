@@ -12,6 +12,7 @@ interface Challenge {
     val name: String
     val id: Int
     val subchallenges: List<Subchallenge>
+    val isTeamChallenge: Boolean
 }
 
 typealias ChallengeCollection = MongoCollection<Document>
