@@ -1,4 +1,4 @@
-Wow! `%lastanswer%` units??!! That's *loads* of water.
+Wow! %lastanswer%??!! That's loads of water.
 
 The scientists are concerned with the volume of water there, and want to know how much more it can hold.
 
