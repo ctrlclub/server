@@ -3,6 +3,9 @@ package club.ctrl.server.challenges.impl
 import club.ctrl.server.challenges.Challenge
 import club.ctrl.server.challenges.ChallengeCollection
 import club.ctrl.server.challenges.Subchallenge
+import club.ctrl.server.extensions.fillPlaceholders
+import club.ctrl.server.extensions.findSerializable
+import club.ctrl.server.extensions.upsertSerializable
 import club.ctrl.server.server.routes.SubmissionFeedback
 import com.mongodb.client.model.Filters
 import kotlinx.serialization.Serializable
@@ -37,23 +40,17 @@ object SecondChallengeP0 : Subchallenge {
 
         val uniqueDataset = UniqueDataset(userId, dataset, sum, mean, maxDelta)
 
-        val json = Json.encodeToString(uniqueDataset)
-        val doc = Document.parse(json)
-
-        db.insertOne(doc)
+        upsertSerializable(db, uniqueDataset) {
+            Filters.eq("userId", userId)
+        }
     }
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
 
-        val requiredAnswer = db.find(Filters.eq("userId", userId))
-        requiredAnswer.first() ?: return SubmissionFeedback(false, "No dataset found")
-
-        val datasetObject: UniqueDataset = requiredAnswer.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<UniqueDataset>(json)
-        }
+        val datasetObject = findSerializable<UniqueDataset>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         if(datasetObject.sum == submission.toInt()) {
             return SubmissionFeedback(true, "")
@@ -63,17 +60,15 @@ object SecondChallengeP0 : Subchallenge {
     }
 
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
-        val dataset = db.find(Filters.eq("userId", userId))
-        dataset.first() ?: return "No dataset found"
+        val datasetObject = findSerializable<UniqueDataset>(db) {
+            Filters.eq("userId", userId)
+        } ?: return "No dataset was generated for this challenge"
 
-        val datasetObject: UniqueDataset = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<UniqueDataset>(json)
-        }
 
         var content = loadLocalContent()
-        content = content!!.replace("%list%", datasetObject.dataset)
+        content = content!!.fillPlaceholders(
+            "list" to datasetObject.dataset
+        )
 
         return content
     }
@@ -89,14 +84,9 @@ object SecondChallengeP1 : Subchallenge {
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
 
-        val requiredAnswer = db.find(Filters.eq("userId", userId))
-        requiredAnswer.first() ?: return SubmissionFeedback(false, "No dataset found")
-
-        val datasetObject: UniqueDataset = requiredAnswer.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<UniqueDataset>(json)
-        }
+        val datasetObject = findSerializable<UniqueDataset>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         if(datasetObject.mean == submission.toInt()) {
             return SubmissionFeedback(true, "")
@@ -115,14 +105,9 @@ object SecondChallengeP2 : Subchallenge {
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
 
-        val requiredAnswer = db.find(Filters.eq("userId", userId))
-        requiredAnswer.first() ?: return SubmissionFeedback(false, "No dataset found")
-
-        val datasetObject: UniqueDataset = requiredAnswer.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<UniqueDataset>(json)
-        }
+        val datasetObject = findSerializable<UniqueDataset>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         if(datasetObject.maxDelta == submission.toInt()) {
             return SubmissionFeedback(true, "")

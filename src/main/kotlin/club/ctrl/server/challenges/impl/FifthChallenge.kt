@@ -32,11 +32,9 @@ object FifthChallengeP0 : Subchallenge {
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
         val dataset = findSerializable<AnswerSet>(db) {
             Filters.eq("userId", userId)
-        }
-        dataset ?: return "No dataset was generated for this challenge"
+        } ?: return "No dataset was generated for this challenge"
 
-        var content = loadLocalContent()
-        content ?: return "No content could be loaded for this challenge"
+        var content = loadLocalContent() ?: return "No subchallenge content found"
 
         content = content.fillPlaceholders(
             "map" to dataset.map,
@@ -78,11 +76,9 @@ object FifthChallengeP1 : Subchallenge {
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
         val dataset = findSerializable<AnswerSet>(db) {
             Filters.eq("userId", userId)
-        }
-        dataset ?: return "No dataset was generated for this challenge"
+        } ?: return "No dataset was generated for this challenge"
 
-        var content = loadLocalContent()
-        content ?: return "No content could be loaded for this challenge"
+        var content = loadLocalContent() ?: return "No subchallenge content found"
 
         content = content.fillPlaceholders(
             "lastanswer" to dataset.total.toString()

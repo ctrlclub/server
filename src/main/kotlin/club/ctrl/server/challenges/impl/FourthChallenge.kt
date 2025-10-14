@@ -3,13 +3,11 @@ package club.ctrl.server.challenges.impl
 import club.ctrl.server.challenges.Challenge
 import club.ctrl.server.challenges.ChallengeCollection
 import club.ctrl.server.challenges.Subchallenge
-import club.ctrl.server.database.findSerializable
 import club.ctrl.server.server.routes.SubmissionFeedback
-import com.mongodb.client.model.Filters
 
 
 object FourthChallenge : Challenge {
-    override val name: String = "Team: Team challenge yea"
+    override val name: String = "josh challeng"
     override val id: Int = 3
     override val subchallenges: List<Subchallenge> = listOf(FourthChallengeP0, FourthChallengeP1)
     override val isTeamChallenge: Boolean = true;

@@ -3,6 +3,9 @@ package club.ctrl.server.challenges.impl
 import club.ctrl.server.challenges.Challenge
 import club.ctrl.server.challenges.ChallengeCollection
 import club.ctrl.server.challenges.Subchallenge
+import club.ctrl.server.extensions.fillPlaceholders
+import club.ctrl.server.extensions.findSerializable
+import club.ctrl.server.extensions.upsertSerializable
 import club.ctrl.server.server.routes.SubmissionFeedback
 import com.mongodb.client.model.Filters
 import kotlinx.serialization.Serializable
@@ -85,43 +88,37 @@ object ThirdChallengeP0 : Subchallenge {
             }
             .size
 
-        val jsonString = Json.encodeToString(DatabaseEntry(userId, explorers.subList(0, 5), explorers.subList(5, 7), grid.map { it.toList() }, lowestExplorerName, sumCoordinates, totalSurvived))
-        val doc = Document.parse(jsonString)
-        db.insertOne(doc)
+        upsertSerializable(db, DatabaseEntry(userId, explorers.subList(0, 5), explorers.subList(5, 7), grid.map { it.toList() }, lowestExplorerName, sumCoordinates, totalSurvived)) {
+            Filters.eq("userId", userId)
+        }
     }
 
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
-        val dataset = db.find(Filters.eq("userId", userId))
-        dataset.first() ?: return "No dataset found"
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return "No dataset was generated for this challenge"
 
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
 
-        var content = loadLocalContent()
         val formattedNames = datasetObject.firstExplorers.map {
             "    (\"${it.name}\", (${it.coord.x}, ${it.coord.y}), ${it.resources})"
         }
-        content = content!!.replace("%explorer_data%", "[\n${formattedNames.joinToString(",\n")}\n]")
-
         val formattedGrid = datasetObject.grid.map { row ->
             "    [${row.joinToString(", ")}]"
         }
-        content = content.replace("%island_map%", "[\n${formattedGrid.joinToString(",\n")}\n]")
+
+        var content = loadLocalContent() ?: return "No subchallenge content found"
+        content = content.fillPlaceholders(
+            "explorer_data" to "[\n${formattedNames.joinToString(",\n")}\n]",
+            "island_map" to "[\n${formattedGrid.joinToString(",\n")}\n]",
+        )
 
         return content
     }
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        val dataset = db.find(Filters.eq("userId", userId))
-
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         return SubmissionFeedback(datasetObject.lowestExplorerName.equals(submission, ignoreCase = true), "")
 
@@ -135,17 +132,14 @@ object ThirdChallengeP1 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
-        val dataset = db.find(Filters.eq("userId", userId))
-        dataset.first() ?: return "No dataset found"
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return "No dataset was generated for this challenge"
 
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
-
-        var content = loadLocalContent()
-        content = content!!.replace("%lowest_explorer%", datasetObject.lowestExplorerName)
+        var content = loadLocalContent() ?: return "No subchallenge content found"
+        content = content.fillPlaceholders(
+            "lowest_explorer" to datasetObject.lowestExplorerName
+        )
 
         return content
     }
@@ -153,13 +147,9 @@ object ThirdChallengeP1 : Subchallenge {
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
 
-        val dataset = db.find(Filters.eq("userId", userId))
-
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         if(datasetObject.sumCoordinates == submission.toInt()) {
             return SubmissionFeedback(true, "")
@@ -177,20 +167,17 @@ object ThirdChallengeP2 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
     override fun loadMarkdown(userId: String, db: ChallengeCollection): String {
-        val dataset = db.find(Filters.eq("userId", userId))
-        dataset.first() ?: return "No dataset found"
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return "No dataset was generated for this challenge"
 
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
-
-        var content = loadLocalContent()
+        var content = loadLocalContent() ?: return "No subchallenge content found"
         val formattedNames = datasetObject.secondExplorers.map {
             "    (\"${it.name}\", (${it.coord.x}, ${it.coord.y}), ${it.resources})"
         }
-        content = content!!.replace("%new_explorers%", "[\n${formattedNames.joinToString(",\n")}\n]")
+        content = content!!.fillPlaceholders(
+            "new_explorers" to "[\n${formattedNames.joinToString(",\n")}\n]"
+        )
 
         return content
     }
@@ -198,13 +185,9 @@ object ThirdChallengeP2 : Subchallenge {
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
         submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer!")
 
-        val dataset = db.find(Filters.eq("userId", userId))
-
-        val datasetObject: DatabaseEntry = dataset.first().let {
-            it.remove("_id")
-            val json = it.toJson()
-            Json.decodeFromString<DatabaseEntry>(json)
-        }
+        val datasetObject = findSerializable<DatabaseEntry>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
 
         if(datasetObject.totalSurvived == submission.toInt()) {
             return SubmissionFeedback(true, "")
