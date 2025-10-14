@@ -88,6 +88,18 @@ fun populateTeams(count: Int, db: MongoDatabase): List<TeamCode> {
     return newEntries;
 }
 
+fun getActiveTeamIds(db: MongoDatabase): List<Int> {
+    val results = db.getCollection(TEAM_CODES).find()
+    val ids = mutableListOf<Int>()
+
+    results.forEach {
+        if(it == null) return@forEach;
+        ids.add(it.getInteger("teamId"))
+    }
+
+    return ids
+}
+
 fun lookupTeamCode(teamCode: Int, db: MongoDatabase): Int? {
     val results = db.getCollection(TEAM_CODES).find(Filters.eq("teamCode", teamCode)).filterNotNull()
 

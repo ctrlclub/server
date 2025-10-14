@@ -41,6 +41,7 @@ data class SubmissionFeedback(val correct: Boolean, val userFeedback: String)
 fun Route.challengesRoute(db: MongoDatabase) {
     get("/list") {
         val userId = call.attributes[UserIdKey] // injected by authenticating middleware
+        val team = getUserTeam(userId, db)
 
         val challengeListingBuilder: MutableList<ChallengeListing> = mutableListOf()
 
@@ -48,13 +49,13 @@ fun Route.challengesRoute(db: MongoDatabase) {
         for(challenge in ChallengeManager.challenges) {
             if(!challengeMeta.containsKey(challenge.id)) continue // ignore all challenges not referenced in database
 
-            val visible_unlocked = challengeMeta[challenge.id]!!
-            if(!visible_unlocked.first) continue // if challenge is not visible, don't send to frontend
+            val visibleUnlocked = challengeMeta[challenge.id]!!
+            if(!visibleUnlocked.first) continue // if challenge is not visible, don't send to frontend
 
             // get the amount of subchallenges completed to show the correct stars
-            val submissions = getChallengeSubmissions(userId, challenge.id, db)
+            val submissions = getChallengeSubmissions(if(challenge.isTeamChallenge && team != null) { "internal_team${team.teamId}@ctrl.club" } else { userId }, challenge.id, db)
 
-            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, submissions.size, visible_unlocked.second, challenge.name, challenge.isTeamChallenge))
+            challengeListingBuilder.add(ChallengeListing(challenge.id, challenge.subchallenges.size, submissions.size, visibleUnlocked.second, challenge.name, challenge.isTeamChallenge))
         }
 
         call.respondSuccess(challengeListingBuilder)

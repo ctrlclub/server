@@ -1,9 +1,12 @@
 package club.ctrl.server.server.routes
 
+import club.ctrl.server.challenges.ChallengeManager
 import club.ctrl.server.database.ChallengeEntry
 import club.ctrl.server.database.SUBMISSIONS
 import club.ctrl.server.database.VIEWS
 import club.ctrl.server.database.clearTeams
+import club.ctrl.server.database.getActiveTeamIds
+import club.ctrl.server.database.getChallengeSubmissions
 import club.ctrl.server.database.getChallenges
 import club.ctrl.server.database.populateTeams
 import club.ctrl.server.database.setPassword
@@ -29,6 +32,9 @@ data class ChangePassword(val userId: String, val newPassword: String)
 
 @Serializable
 data class GenTeamCodes(val number: Int)
+
+@Serializable
+data class LeaderboardTeamProgress(val teamName: String, val complete: Int, val total: Int)
 
 fun Route.dashboardRoutes(db: MongoDatabase) {
     get("auth") {
@@ -117,6 +123,42 @@ fun Route.dashboardRoutes(db: MongoDatabase) {
 
         val codes = populateTeams(payload.number, db)
         call.respondSuccess(codes)
+    }
+
+
+
+    get("leaderboard/{id}") {
+        val id = call.parameters["id"]!!.toIntOrNull()
+        if(id == null) {
+            call.respondError("Invalid challenge")
+            return@get
+        }
+
+        val challenge = ChallengeManager.challenges.getOrNull(id)
+        if(challenge == null) {
+            call.respondError("Invalid challenge")
+            return@get
+        }
+        if(!challenge.isTeamChallenge) {
+            call.respondError("Leaderboard only available on team challenges")
+            return@get
+        }
+
+
+        val teamsEmails = getActiveTeamIds(db)
+        val progresses = mutableListOf<LeaderboardTeamProgress>()
+
+        teamsEmails.forEach {
+            progresses.add(
+                LeaderboardTeamProgress(
+                    "Team $it",
+                    getChallengeSubmissions("internal_team$it@ctrl.club", challenge.id, db).size,
+                    challenge.subchallenges.size
+                )
+            )
+        }
+
+        call.respondSuccess(progresses)
     }
 }
 

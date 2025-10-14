@@ -29,7 +29,6 @@ fun getWorkingAt(userId: String, challengeId: Int, db: MongoDatabase): Int? {
 
 // returns all submissions on a challenge, ordered by subchallenge id
 fun getChallengeSubmissions(userId: String, challengeId: Int, db: MongoDatabase): List<Submission> {
-    println("Looking for values with uid:$userId and cid:$challengeId")
     val filter = Filters.and(Filters.eq("userId", userId), Filters.eq("challengeId", challengeId))
     val databaseResult = db.getCollection(SUBMISSIONS).find(filter)
 
