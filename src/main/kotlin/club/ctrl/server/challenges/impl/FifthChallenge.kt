@@ -65,7 +65,18 @@ object FifthChallengeP0 : Subchallenge {
     }
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        return SubmissionFeedback(true, "")
+        submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer")
+        val int = submission.toInt()
+
+        val dataset = findSerializable<AnswerSet>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
+
+        if(dataset.total == int) {
+            return SubmissionFeedback(true, "")
+        }
+
+        return SubmissionFeedback(false, "Incorrect answer. Your answer was too ${if(int > dataset.total) { "high" } else { "low" }}")
     }
 }
 
@@ -90,7 +101,18 @@ object FifthChallengeP1 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        return SubmissionFeedback(true, "")
+        submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer")
+        val int = submission.toInt()
+
+        val dataset = findSerializable<AnswerSet>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
+
+        if(dataset.remaining == int) {
+            return SubmissionFeedback(true, "")
+        }
+
+        return SubmissionFeedback(false, "Incorrect answer. Your answer was too ${if(int > dataset.remaining) { "high" } else { "low" }}")
     }
 }
 
@@ -101,7 +123,18 @@ object FifthChallengeP2 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        return SubmissionFeedback(true, "")
+        submission.toDoubleOrNull() ?: return SubmissionFeedback(false, "The answer must be an decimal number")
+        val answer = submission.toDouble()
+
+        val dataset = findSerializable<AnswerSet>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
+
+        if(dataset.median == answer) {
+            return SubmissionFeedback(true, "")
+        }
+
+        return SubmissionFeedback(false, "Incorrect answer")
     }
 }
 
@@ -112,7 +145,18 @@ object FifthChallengeP3 : Subchallenge {
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
     override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
-        return SubmissionFeedback(true, "")
+        submission.toIntOrNull() ?: return SubmissionFeedback(false, "The answer must be an integer")
+        val int = submission.toInt()
+
+        val dataset = findSerializable<AnswerSet>(db) {
+            Filters.eq("userId", userId)
+        } ?: return SubmissionFeedback(false, "No dataset generated")
+
+        if(dataset.numBasins == int) {
+            return SubmissionFeedback(true, "")
+        }
+
+        return SubmissionFeedback(false, "Incorrect answer. Your answer was too ${if(int > dataset.numBasins) { "high" } else { "low" }}")
     }
 }
 
