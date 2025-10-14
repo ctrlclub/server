@@ -8,8 +8,8 @@ import club.ctrl.server.database.getChallenges
 import club.ctrl.server.database.populateTeams
 import club.ctrl.server.database.setPassword
 import club.ctrl.server.database.updateChallenges
-import club.ctrl.server.entity.respondError
-import club.ctrl.server.entity.respondSuccess
+import club.ctrl.server.extensions.respondError
+import club.ctrl.server.extensions.respondSuccess
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import io.ktor.server.request.ContentTransformationException

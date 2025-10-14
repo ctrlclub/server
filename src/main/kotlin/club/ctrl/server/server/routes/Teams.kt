@@ -4,8 +4,8 @@ import club.ctrl.server.database.Team
 import club.ctrl.server.database.getUserTeam
 import club.ctrl.server.database.registerUserInTeam
 import club.ctrl.server.database.removeUserInTeam
-import club.ctrl.server.entity.respondError
-import club.ctrl.server.entity.respondSuccess
+import club.ctrl.server.extensions.respondError
+import club.ctrl.server.extensions.respondSuccess
 import club.ctrl.server.server.UserIdKey
 import com.mongodb.client.MongoDatabase
 import io.ktor.server.request.ContentTransformationException

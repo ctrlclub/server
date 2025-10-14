@@ -1,7 +1,7 @@
 package club.ctrl.server.database
 
 import at.favre.lib.crypto.bcrypt.BCrypt
-import club.ctrl.server.entity.ResponseWrapper
+import club.ctrl.server.extensions.ResponseWrapper
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates

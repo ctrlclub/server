@@ -2,7 +2,7 @@ package club.ctrl.server.server
 
 import club.ctrl.server.database.isPrivileged
 import club.ctrl.server.database.tokenToEmail
-import club.ctrl.server.entity.respondError
+import club.ctrl.server.extensions.respondError
 import com.mongodb.client.MongoDatabase
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.util.AttributeKey

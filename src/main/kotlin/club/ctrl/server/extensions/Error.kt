@@ -1,4 +1,4 @@
-package club.ctrl.server.entity
+package club.ctrl.server.extensions
 
 import kotlinx.serialization.Serializable
 import io.ktor.server.response.respond

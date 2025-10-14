@@ -1,7 +1,6 @@
 package club.ctrl.server.server.routes
 
 import club.ctrl.server.challenges.ChallengeManager
-import club.ctrl.server.challenges.Subchallenge
 import club.ctrl.server.database.addViewIfNotExists
 import club.ctrl.server.database.getChallengeMeta
 import club.ctrl.server.database.getChallengeSubmissions
@@ -10,8 +9,8 @@ import club.ctrl.server.database.getUserTeam
 import club.ctrl.server.database.getWorkingAt
 import club.ctrl.server.database.hasViewed
 import club.ctrl.server.database.registerSubmission
-import club.ctrl.server.entity.respondError
-import club.ctrl.server.entity.respondSuccess
+import club.ctrl.server.extensions.respondError
+import club.ctrl.server.extensions.respondSuccess
 import club.ctrl.server.server.UserIdKey
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase

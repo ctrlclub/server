@@ -1,7 +1,7 @@
 package club.ctrl.server.server.routes
 
-import club.ctrl.server.entity.respondError
-import club.ctrl.server.entity.respondSuccess
+import club.ctrl.server.extensions.respondError
+import club.ctrl.server.extensions.respondSuccess
 import club.ctrl.server.database.login
 import club.ctrl.server.database.logout
 import com.mongodb.client.MongoDatabase

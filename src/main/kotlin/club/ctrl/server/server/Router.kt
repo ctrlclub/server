@@ -1,12 +1,11 @@
 package club.ctrl.server.server
 
-import club.ctrl.server.entity.respondError
+import club.ctrl.server.extensions.respondError
 import club.ctrl.server.server.routes.authenticationRoutes
 import club.ctrl.server.server.routes.challengesRoute
 import club.ctrl.server.server.routes.dashboardRoutes
 import club.ctrl.server.server.routes.teamsRoutes
 import com.mongodb.ConnectionString
-import com.mongodb.LoggerSettings
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
