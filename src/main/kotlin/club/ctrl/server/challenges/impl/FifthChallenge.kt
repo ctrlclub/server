@@ -3,8 +3,9 @@ package club.ctrl.server.challenges.impl
 import club.ctrl.server.challenges.Challenge
 import club.ctrl.server.challenges.ChallengeCollection
 import club.ctrl.server.challenges.Subchallenge
-import club.ctrl.server.database.findSerializable
-import club.ctrl.server.database.upsertSerializable
+import club.ctrl.server.extensions.fillPlaceholders
+import club.ctrl.server.extensions.findSerializable
+import club.ctrl.server.extensions.upsertSerializable
 import club.ctrl.server.server.routes.SubmissionFeedback
 import com.mongodb.client.model.Filters
 import kotlinx.serialization.Serializable
@@ -17,7 +18,7 @@ data class AnswerSet(val userId: String, val map: String, val total: Int, val re
 object FifthChallenge : Challenge {
     override val name: String = "Team: The Great Flood \uD83C\uDF0A"
     override val id: Int = 4
-    override val subchallenges: List<Subchallenge> = listOf(FifthChallengeP0, FifthChallengeP1, FifthChallengeP2)
+    override val subchallenges: List<Subchallenge> = listOf(FifthChallengeP0, FifthChallengeP1, FifthChallengeP2, FifthChallengeP3)
     override val isTeamChallenge: Boolean = true;
 }
 
@@ -35,11 +36,11 @@ object FifthChallengeP0 : Subchallenge {
         dataset ?: return "No dataset was generated for this challenge"
 
         var content = loadLocalContent()
-        println(content)
         content ?: return "No content could be loaded for this challenge"
 
-        content = content.replace("%map%", dataset.map)
-        content = content.replace("%basins%", dataset.numBasins.toString())
+        content = content.fillPlaceholders(
+            "map" to dataset.map,
+        )
 
         return content
     }
@@ -81,10 +82,11 @@ object FifthChallengeP1 : Subchallenge {
         dataset ?: return "No dataset was generated for this challenge"
 
         var content = loadLocalContent()
-        println(content)
         content ?: return "No content could be loaded for this challenge"
 
-        content = content.replace("%lastanswer%", dataset.total.toString())
+        content = content.fillPlaceholders(
+            "lastanswer" to dataset.total.toString()
+        )
 
         return content
     }
@@ -99,6 +101,17 @@ object FifthChallengeP1 : Subchallenge {
 object FifthChallengeP2 : Subchallenge {
     override val parent: Challenge = FifthChallenge
     override val subchallengeIdx: Int = 2
+
+    override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
+
+    override fun onSubmit(userId: String, submission: String, db: ChallengeCollection): SubmissionFeedback {
+        return SubmissionFeedback(true, "")
+    }
+}
+
+object FifthChallengeP3 : Subchallenge {
+    override val parent: Challenge = FifthChallenge
+    override val subchallengeIdx: Int = 3
 
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 

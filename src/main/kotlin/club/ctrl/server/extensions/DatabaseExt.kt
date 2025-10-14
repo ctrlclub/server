@@ -1,7 +1,6 @@
-package club.ctrl.server.database
+package club.ctrl.server.extensions
 
 import com.mongodb.client.MongoCollection
-import com.mongodb.client.model.Filters
 import com.mongodb.client.model.UpdateOptions
 import com.mongodb.client.model.Updates
 import kotlinx.serialization.json.Json

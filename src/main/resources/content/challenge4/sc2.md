@@ -1,20 +1,13 @@
-Wow! %lastanswer%??!! That's loads of water.
-
-The scientists are concerned with the volume of water there, and want to know how much more it can hold.
+Phew... it doesn't seem too flooded yet.
 
 ---
-## Part 2 — Floodplain Capacity
 
-As said before, each cell in the floodplain can hold up to **100 units of water**.
+### Part 3 - The Median
 
-Using your answer from **Part 1**, and the size of your **floodplain dataset**, calculate how many more units of water can be held.
+To help the scientists analyse the floodplain further, they've asked for the **median** flood height. 
 
-::: hint
+To start, I'd recommend you **flatten** the 2D array (merge all values into one big 1D array).
+From there you can sort the array, and find the median value.
 
-First, multiply the width and height of your dataset. This calculates your total number of cells.
+Good luck! :)
 
-`num_cells * 100` is the total water capacity.
-
-:::
-
-Use your dataset from **Part 1**.
