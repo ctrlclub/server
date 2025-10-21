@@ -102,7 +102,14 @@ fun Route.challengesRoute(db: MongoDatabase) {
             val viewed = hasViewed(userId, id, workingAt, db)
             if(!viewed) {
                 // first we get the subchallenge to init anything it needs to
-                ChallengeManager.challenges[id].subchallenges[workingAt].onFirstOpen(userId, scopeChallengeCollection(challengeObj.id, db))
+                try {
+                    ChallengeManager.challenges[id].subchallenges[workingAt].onFirstOpen(
+                        userId,
+                        scopeChallengeCollection(challengeObj.id, db)
+                    )
+                } catch(ex: Exception) {
+                    error("Error generating user dataset: $ex")
+                }
             }
 
             // add the contents for the working at subchallenge
