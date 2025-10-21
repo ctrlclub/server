@@ -6,10 +6,10 @@ import club.ctrl.server.challenges.Subchallenge
 import club.ctrl.server.server.routes.SubmissionFeedback
 
 object FourthChallenge : Challenge {
-    override val name: String = "Basics: Fix the bugs!"
+    override val name: String = "Team: Fix the bugs!"
     override val id: Int = 3
     override val subchallenges: List<Subchallenge> = listOf(FourthChallengeP0, FourthChallengeP1)
-    override val isTeamChallenge: Boolean = false
+    override val isTeamChallenge: Boolean = true
 }
 
 object FourthChallengeP0 : Subchallenge {
