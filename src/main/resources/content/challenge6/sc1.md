@@ -4,7 +4,7 @@ NOTE: The rest of the challenges are based on the file you uploaded for your las
 The owner wants to keep her member list more organised by having it in alphabetical order. Your task:
 - Read the file
 - Sort the names alphabetically **by surname**
-- Write back to the file with the sorted names
+- Overwrite the file with the new, sorted names
 
 Copy and paste the final file into the answer box.
 
@@ -17,4 +17,5 @@ names = ["John Smith", "Alice Johnson", "Bob Brown", "Charlie McDonald"]
 # Sort by surname (last word)
 sorted_names = sorted(names, key=lambda name: name.split()[-1])
 ```
+>
 :::

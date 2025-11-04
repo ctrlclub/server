@@ -18,7 +18,7 @@ object SeventhChallenge : Challenge {
     override val name: String = "File IO: The Basics"
     override val id: Int = 6
     override val subchallenges: List<Subchallenge> = listOf(SeventhChallengeP0, SeventhChallengeP1, SeventhChallengeP2)
-    override val isTeamChallenge: Boolean = true
+    override val isTeamChallenge: Boolean = false
 }
 
 object SeventhChallengeP0 : Subchallenge {
@@ -75,10 +75,10 @@ object SeventhChallengeP0 : Subchallenge {
             Filters.eq("userId", userId)
         } ?: return SubmissionFeedback(false, "No dataset generated")
 
-        val file = dataset.names.joinToString("\n")
+        val file = dataset.names.joinToString("").replace(" ", "")
 
-        if (submission.contentEquals(file)) {
-            return SubmissionFeedback(true, "Good")
+        if (submission.replace(" ", "").contentEquals(file)) {
+            return SubmissionFeedback(true, "")
         }
 
         return SubmissionFeedback(false, "Try again")
@@ -97,10 +97,11 @@ object SeventhChallengeP1 : Subchallenge {
         } ?: return SubmissionFeedback(false, "No dataset generated")
 
         val sortedBySurname = dataset.names.sortedBy { it.substringAfterLast(" ") }
-        val file = sortedBySurname.joinToString("\n")
+        val submissionNames = submission.split(" ").chunked(2).map { it.joinToString(" ") }
+        val sortedSubmissions = submissionNames.sortedBy { it.substringAfterLast(" ") }
 
-        if (submission.contentEquals(file)) {
-            return SubmissionFeedback(true, "Good")
+        if (sortedBySurname == sortedSubmissions) {
+            return SubmissionFeedback(true, "")
         }
 
         return SubmissionFeedback(false, "Try again")
@@ -109,7 +110,7 @@ object SeventhChallengeP1 : Subchallenge {
 
 object SeventhChallengeP2 : Subchallenge {
     override val parent: Challenge = SeventhChallenge
-    override val subchallengeIdx: Int = 1
+    override val subchallengeIdx: Int = 2
 
     override fun onFirstOpen(userId: String, db: ChallengeCollection) = Unit // subchallenge 0 inits all data
 
