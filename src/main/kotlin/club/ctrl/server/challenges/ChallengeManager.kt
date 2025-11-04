@@ -1,5 +1,6 @@
 package club.ctrl.server.challenges
 
+import club.ctrl.server.challenges.impl.EighthChallengeRecursion
 import club.ctrl.server.challenges.impl.FifthChallenge
 import club.ctrl.server.challenges.impl.FirstChallenge
 import club.ctrl.server.challenges.impl.SecondChallenge
@@ -9,5 +10,5 @@ import club.ctrl.server.challenges.impl.SixthChallenge
 import club.ctrl.server.challenges.impl.SeventhChallenge
 
 object ChallengeManager {
-    val challenges: List<Challenge> = listOf(FirstChallenge, SecondChallenge, ThirdChallenge, FourthChallenge, FifthChallenge, SixthChallenge, SeventhChallenge)
+    val challenges: List<Challenge> = listOf(FirstChallenge, SecondChallenge, ThirdChallenge, FourthChallenge, FifthChallenge, SixthChallenge, SeventhChallenge, EighthChallengeRecursion)
 }
